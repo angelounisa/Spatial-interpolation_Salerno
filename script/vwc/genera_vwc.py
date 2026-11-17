@@ -3,11 +3,9 @@
    con banda 5-95% dai residui di verifica incrociata;
 2) pioggia stocastica a impulsi di Poisson marcati (lambda, alpha mensili) -> Monte Carlo del modello tarato;
 3) pdf analitica stazionaria di Laio et al. (2001) per lo strato superficiale, per stagione;
-4) suzione dalla curva di ritenzione (van Genuchten) adattata ai dati misurati.
 """
 import sys, json, os
 import numpy as np, pandas as pd
-from scipy.optimize import curve_fit
 sys.argv = [sys.argv[0]] + ['/home/claude/outputs/vwc']
 from laio_vwc import *          # dati, ET0, simulate, unpack, metrics, i_start, i_split, i_end
 
@@ -40,23 +38,6 @@ for j in range(3):
         a, b = q[(j, lab)]
         lo[msk, j] = np.clip(SIM[msk, j] - b, TH_H[j], TH_S[j]); hi[msk, j] = np.clip(SIM[msk, j] - a, TH_H[j], TH_S[j])
 cover = {NAMES[j]: float(np.nanmean((O[i_start:i_end, j] >= lo[i_start:i_end, j]) & (O[i_start:i_end, j] <= hi[i_start:i_end, j]))) for j in range(3)}
-
-# ------------------------------------------------------------------ 4) curva di ritenzione
-def vg(psi, tr, ts, a, n):
-    return tr + (ts - tr) / (1 + (a * psi) ** n) ** (1 - 1 / n)
-VG = {}
-for j, c in enumerate(['s15', 's30', 's60']):
-    d = obs[[['v15', 'v30', 'v60'][j], c]].dropna(); d = d[d[c] > 0.5]
-    th, ps = d.iloc[:, 0].to_numpy(), d.iloc[:, 1].to_numpy()
-    p, _ = curve_fit(lambda lp, tr, ts, la, n: vg(10 ** lp, tr, ts, 10 ** la, n), np.log10(ps), th,
-                     p0=[0.01, th.max(), -1.5, 1.5], bounds=([0, th.max() * 0.9, -5, 1.05], [th.min(), 0.6, 2, 6]), maxfev=20000)
-    tr, ts, la, n = p
-    inv = lambda t, tr=tr, ts=ts, a=10 ** la, n=n: (np.clip(((ts - tr) / np.clip(t - tr, 1e-4, None)) ** (n / (n - 1)) - 1, 1e-9, None)) ** (1 / n) / a
-    pred = inv(th)
-    VG[c] = dict(theta_r=tr, theta_s=ts, alpha_kPa=10 ** la, n=n,
-                 r2_log=float(1 - np.mean((np.log10(pred) - np.log10(ps)) ** 2) / np.var(np.log10(ps))), inv=inv)
-    print(c, {k2: round(v, 4) for k2, v in VG[c].items() if k2 != 'inv'})
-PSI = np.column_stack([np.clip(VG[c]['inv'](SIM[:, j]), 0.1, 5000) for j, c in enumerate(['s15', 's30', 's60'])])
 
 # ------------------------------------------------------------------ 2) pioggia stocastica (Poisson marcato)
 day = (H - pd.Timedelta(minutes=1)).floor('D')
@@ -156,17 +137,15 @@ ser = pd.DataFrame({'data_ora_fine_intervallo_solare': H.strftime('%Y-%m-%d %H:%
 for j, nm in enumerate(['15cm', '30cm', '60cm']):
     ser[f'vwc_{nm}'] = SIM[:, j].round(4); ser[f'vwc_{nm}_p05'] = lo[:, j].round(4); ser[f'vwc_{nm}_p95'] = hi[:, j].round(4)
 for j, nm in enumerate(['15cm', '30cm', '60cm']):
-    ser[f'suzione_{nm}_kPa'] = PSI[:, j].round(1)
-for j, nm in enumerate(['15cm', '30cm', '60cm']):
     ser[f'vwc_{nm}_misurato'] = np.round(O[:, j], 4)
 ser.to_csv(f'{OUT}/vwc_sintetico_orario_2016_2026.csv', index=False)
-ho = obs.copy(); ho.index.name = 'data_ora_fine_intervallo_solare'
+ho = obs[['v15', 'v30', 'v60']].copy(); ho.index.name = 'data_ora_fine_intervallo_solare'
 ho.round(4).to_csv(f'{OUT}/vwc_misurato_medie_orarie.csv')
 pd.DataFrame({'mese': range(1, 13), 'lambda_eventi_giorno': lam.values.round(3), 'alpha_mm': alp.values.round(2)}).to_csv(f'{OUT}/pioggia_poisson_marcato_mensile.csv', index=False)
 mcd = pd.DataFrame({'ora': np.arange(len(MC)), **{f'vwc_{n}': MC[:, j].round(4) for j, n in enumerate(['15cm', '30cm', '60cm'])}})
 mcd.iloc[:24 * 365 * 50].to_csv(f'{OUT}/vwc_montecarlo_50anni.csv.gz', index=False, compression='gzip')
 rep = json.load(open(f'{OUT}/taratura_laio.json'))
-summary = dict(catena=chain, copertura_banda=cover, vg={c: {k2: v for k2, v in d.items() if k2 != 'inv'} for c, d in VG.items()},
+summary = dict(catena=chain, copertura_banda=cover,
                poisson=dict(lam=lam.round(3).tolist(), alpha=alp.round(2).tolist()), periodi_secchi=spell,
                pdf=pdfs, check_analitica=check, quantili=quant, verifica=rep, NY=NY)
 json.dump(summary, open(f'{OUT}/sintesi_vwc.json', 'w'))

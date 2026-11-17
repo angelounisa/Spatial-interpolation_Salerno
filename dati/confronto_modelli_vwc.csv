@@ -1,0 +1,13 @@
+modello,profondita,NSE,KGE,corr,RMSE,bias_picchi
+Laio,15 cm,0.804,0.814,0.911,0.016,-0.023
+Laio,30 cm,0.856,0.896,0.934,0.022,-0.014
+Laio,60 cm,0.749,0.823,0.949,0.029,-0.036
+ERA5-Land riscalato,15 cm,0.615,0.652,0.854,0.021,-0.051
+ERA5-Land riscalato,30 cm,0.909,0.932,0.962,0.017,-0.005
+ERA5-Land riscalato,60 cm,0.751,0.687,0.956,0.027,0.021
+Laio + ERA5-Land,15 cm,0.886,0.851,0.957,0.012,-0.02
+Laio + ERA5-Land,30 cm,0.913,0.911,0.961,0.017,-0.001
+Laio + ERA5-Land,60 cm,0.862,0.782,0.968,0.021,-0.002
+Laio + ERA5-Land (varianza conservata),15 cm,0.885,0.873,0.957,0.012,-0.016
+Laio + ERA5-Land (varianza conservata),30 cm,0.91,0.906,0.961,0.017,0.001
+Laio + ERA5-Land (varianza conservata),60 cm,0.86,0.782,0.968,0.022,-0.0
