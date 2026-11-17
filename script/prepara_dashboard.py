@@ -1,7 +1,7 @@
 """Prepara i dati riassuntivi (JSON) per la dashboard."""
 import json, numpy as np, pandas as pd
 R = "/home/claude/spatial-interpolation_salerno"
-f = pd.read_csv(f"{R}/dati/salerno_punto_orario_2016_2026_tarato.csv", parse_dates=["data_ora_fine_intervallo"]).set_index("data_ora_fine_intervallo")
+f = pd.read_csv(f"{R}/dati/salerno_punto_orario_2016_2026_tarato.csv", parse_dates=["data_ora_fine_intervallo_solare"]).set_index("data_ora_fine_intervallo_solare")
 est = pd.read_csv("/home/claude/outputs/orografia/salerno_punto_orario_2016_2026.csv", parse_dates=["data_ora_fine_intervallo"]).set_index("data_ora_fine_intervallo")
 r = lambda x, n=2: None if pd.isna(x) else round(float(x), n)
 # giornaliero (giorno = ore 01..24 di quel giorno -> uso etichetta fine intervallo - 1 minuto)
@@ -18,7 +18,7 @@ mon = c.groupby(c.index.month).agg(tmed=("tmed", "mean"), tmin=("tmin", "mean"),
 pm = c.p.resample("MS").sum(); pm = pm.groupby(pm.index.month).mean()
 clim = [dict(mese=int(m), tmed=r(x.tmed, 1), tmin=r(x.tmin, 1), tmax=r(x.tmax, 1), pioggia=r(pm[m], 0)) for m, x in mon.iterrows()]
 # validazione pioggia sul punto
-k = 1.075
+k = 1.072
 v = pd.concat([f.pioggia_misurata_mm.rename("mis"), est.pioggia_mm.rename("stima")], axis=1).dropna()
 v["tarata"] = v.stima * k
 vh = v.copy(); vh.index = vh.index - pd.Timedelta(minutes=1)
@@ -32,10 +32,16 @@ valp = dict(ore=len(v), inizio=str(v.index.min()), fine=str(v.index.max()), fatt
             giornaliero=dict(stima=met(vd.stima, vd.mis), tarata=met(vd.tarata, vd.mis)),
             giorni=[[d.strftime("%Y-%m-%d"), r(x.mis, 1), r(x.tarata, 1)] for d, x in vd.iterrows()],
             mesi=[[d.strftime("%Y-%m"), r(x.mis, 0), r(x.stima, 0), r(x.tarata, 0)] for d, x in vm.iterrows() if d >= pd.Timestamp("2025-02-01")],
-            verifiche_split=[dict(metodo="Stima senza taratura", bias=7.1, rmse_h=0.693, rmse_g=2.19),
-                             dict(metodo="Fattore unico", bias=2.1, rmse_h=0.707, rmse_g=2.19),
-                             dict(metodo="Fattore stagionale", bias=2.0, rmse_h=0.700, rmse_g=2.23),
-                             dict(metodo="Pesi tarati sui 6 pluviometri", bias=15.5, rmse_h=0.706, rmse_g=2.59)])
+            # medie di 4 verifiche su periodi non usati (pioggia_spaziotemporale.py e prova della soglia)
+            verifiche_split=[dict(metodo="Kriging con orografia x fattore", corr=0.925, rmse=0.382, trovate=84.8, falsi=16.6, bias=0.0),
+                             dict(metodo="Spazio-temporale, sfasamento comune", corr=0.919, rmse=0.394, trovate=84.9, falsi=16.6, bias=0.2),
+                             dict(metodo="Spazio-temporale, sfasamento per pluviometro", corr=0.917, rmse=0.401, trovate=85.5, falsi=18.3, bias=0.1),
+                             dict(metodo="Kriging con soglia 0,3 mm/h", corr=0.924, rmse=0.383, trovate=78.5, falsi=10.9, bias=0.0)],
+            prima_dopo=[dict(ind="Correlazione oraria", prima=0.73, dopo=0.93), dict(ind="Errore orario (mm)", prima=0.71, dopo=0.38),
+                        dict(ind="Ore piovose trovate (%)", prima=74, dopo=85), dict(ind="Falsi allarmi orari (%)", prima=27, dopo=17),
+                        dict(ind="Correlazione su 6 ore", prima=0.94, dopo=0.95), dict(ind="Correlazione giornaliera", prima=0.97, dopo=0.97)],
+            sfasamenti=[[r.inizio, r.sfas, r.mm, r.corr] for r in pd.read_csv(f"{R}/dati/sfasamento_orario_misura_per_evento.csv")
+                        .rename(columns={"inizio evento": "inizio", "sfasamento": "sfas"}).itertuples() if r.corr >= 0.6])
 vt = pd.read_csv(f"{R}/dati/validazione_temperatura.csv")
 vp = pd.read_csv(f"{R}/dati/validazione_pioggia.csv")
 st = pd.read_csv("/home/claude/outputs/qgis/stazioni_regionali_medie_2001_2020.csv")

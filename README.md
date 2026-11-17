@@ -22,7 +22,7 @@ che tiene conto dell'orografia (DTM TINITALY 10 m). La pioggia è tarata sulla m
 2. Variabili orografiche dal DTM (quota, posizione nel rilievo, altezza sul fondovalle, distanza dal mare, esposizione).
 3. Medie di lungo periodo dalla rete regionale (2001–2020) spiegate con le variabili orografiche.
 4. Ogni ora ogni sensore è riportato al punto con la differenza (temperatura) o il rapporto (pioggia) tra le medie, poi kriging ordinario.
-5. Pioggia tarata sulla misura locale con un fattore unico (1,075); serie finale = misura dove disponibile.
+5. Misura locale riportata all'ora solare (il registratore era in ora legale in parte del periodo); pioggia tarata con un fattore unico (1,072); serie finale = misura dove disponibile. Correlazione oraria con la misura: 0,93.
 
 ## Limiti
 Dati di partenza non validati. La temperatura ha un errore orario stimato di circa 1,6–2 °C perché nessun termometro
