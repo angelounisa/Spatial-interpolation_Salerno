@@ -1,0 +1,7 @@
+stazione,n_ore,media_regionale_2001_2020_mm,media_stimata_senza_stazione_mm,RMSE_orario_solo_distanza,RMSE_orario_orografia,totale_annuo_oss_mm,totale_annuo_solo_distanza_mm,totale_annuo_orografia_mm
+SalernoGenioCivile,95272,1197.0,1190.0,0.676,0.632,1139.51,1373.768,1177.207
+Cologna,95250,1221.0,1398.0,0.481,0.48,1312.47,1299.713,1332.997
+Pellezzano,95292,1343.0,1368.0,0.369,0.382,1283.871,1352.018,1376.583
+CavaDeiTirreni,95310,1518.0,1458.0,0.622,0.639,1401.107,1228.811,1376.085
+Baronissi,95298,1502.0,1340.0,0.59,0.587,1408.973,1341.242,1301.606
+CastiglioneDelGenovesi,95296,1555.0,1439.0,0.713,0.718,1476.227,1312.315,1457.364

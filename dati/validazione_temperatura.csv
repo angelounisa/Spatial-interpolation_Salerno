@@ -1,0 +1,5 @@
+stazione,n_ore,RMSE_solo_distanza,RMSE_quota,RMSE_orografia,ME_orografia,RMSE_notte_quota,RMSE_notte_orografia,RMSE_giorno_quota,RMSE_giorno_orografia
+SalernoMeteo,95149,2.718,1.936,1.98,-0.916,2.163,2.175,1.768,1.797
+MercatoSSeverino,95131,1.512,1.455,1.418,0.241,1.813,1.82,1.002,0.925
+Tramonti,95070,1.94,1.691,1.638,0.062,1.678,1.676,1.907,1.592
+Pizzolano,95121,1.286,1.201,1.263,-0.754,1.438,1.451,0.922,0.949
