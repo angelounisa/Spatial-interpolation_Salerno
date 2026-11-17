@@ -13,7 +13,7 @@
   color-scheme:light;
   --bg:#f4f3ef; --surface:#fcfcfb; --surface-2:#efeee9; --line:#dcdad3;
   --text:#0b0b0b; --text-2:#52514e; --muted:#7a7873;
-  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --band:rgba(42,120,214,.14);
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --band:rgba(42,120,214,.14); --band2:rgba(42,120,214,.30);
   --accent:#2a78d6; --good:#008300; --warn:#b26b00;
 }
 @media (prefers-color-scheme:dark){
@@ -21,7 +21,7 @@
     color-scheme:dark;
     --bg:#121211; --surface:#1a1a19; --surface-2:#232321; --line:#34332f;
     --text:#f0efec; --text-2:#c3c2b7; --muted:#8f8d86;
-    --s1:#3987e5; --s2:#d95926; --s3:#199e70; --band:rgba(57,135,229,.20);
+    --s1:#3987e5; --s2:#d95926; --s3:#199e70; --band:rgba(57,135,229,.20); --band2:rgba(57,135,229,.40);
     --accent:#5a9cf0; --good:#3fbf3f; --warn:#e0a030;
   }
 }
@@ -29,7 +29,7 @@
   color-scheme:dark;
   --bg:#121211; --surface:#1a1a19; --surface-2:#232321; --line:#34332f;
   --text:#f0efec; --text-2:#c3c2b7; --muted:#8f8d86;
-  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --band:rgba(57,135,229,.20);
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --band:rgba(57,135,229,.20); --band2:rgba(57,135,229,.40);
   --accent:#5a9cf0; --good:#3fbf3f; --warn:#e0a030;
 }
 *{box-sizing:border-box}
@@ -115,7 +115,7 @@ footer{color:var(--muted);font-size:12.5px;padding:28px 0 40px}
   <p class="sub">Ricostruzione dai sensori del Centro Funzionale Multirischi della Regione Campania, con interpolazione che tiene conto dell'orografia (DTM TINITALY 10 m) e pioggia tarata sulla misura locale. Tutti gli orari sono in ora solare (UTC+1).</p>
 </header>
 <nav><div class="wrap">
-  <a href="#sintesi" class="on">Sintesi</a><a href="#risultati">Risultati</a><a href="#validazione">Validazione</a><a href="#isoiete">Isoiete</a><a href="#metodo">Metodologia</a><a href="#dati">Dati</a>
+  <a href="#sintesi" class="on">Sintesi</a><a href="#risultati">Risultati</a><a href="#validazione">Validazione</a><a href="#isoiete">Isoiete</a><a href="#vwc">VWC sintetico</a><a href="#metodo">Metodologia</a><a href="#dati">Dati</a>
   <span class="sp"></span><button id="theme" aria-label="Cambia tema">Tema</button>
 </div></nav>
 
@@ -200,6 +200,94 @@ footer{color:var(--muted);font-size:12.5px;padding:28px 0 40px}
   </div>
 </section>
 
+<section id="vwc">
+  <h2>Serie sintetiche di contenuto d'acqua (VWC)</h2>
+  <p class="lead">Contenuto d'acqua volumetrico orario 2016–2026 a 15, 30 e 60 cm, generato da un modello di bilancio idrico del suolo con la funzione di perdita di Laio et al. (2001). Il modello è tarato sulle misure del sito (suolo nudo, 31/01/2025–16/11/2026) e forzato dalla pioggia oraria interpolata e tarata. La parte stocastica (piogge a impulsi di Poisson marcati) dà la distribuzione di probabilità del VWC. Per lo strato superficiale è confrontata con la soluzione analitica di Laio.</p>
+  <div class="grid g4">
+    <div class="card kpi"><div class="l">Serie generata</div><div class="v">2016–2026</div><div class="n">oraria · 15, 30, 60 cm · con banda 5–95%</div></div>
+    <div class="card kpi"><div class="l">Correlazione oraria in verifica</div><div class="v" id="kv-c">–</div><div class="n">anno non usato per la taratura</div></div>
+    <div class="card kpi"><div class="l">NSE in verifica</div><div class="v" id="kv-n">–</div><div class="n">Nash–Sutcliffe, per profondità</div></div>
+    <div class="card kpi"><div class="l">Misure dentro la banda 5–95%</div><div class="v" id="kv-b">–</div><div class="n">2025–2026, per profondità</div></div>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <div class="ctrl">
+      <h3 style="margin:0">Misura e modello, orario</h3>
+      <div class="seg" id="vz"><button data-z="15cm" class="on">15 cm</button><button data-z="30cm">30 cm</button><button data-z="60cm">60 cm</button></div>
+      <select id="vver" aria-label="Versione del modello" style="max-width:100%;min-width:0"><option value="sim">serie fornita (tarata su tutto)</option><option value="cv">verifica (tarata sull'altro anno)</option></select>
+    </div>
+    <div class="legend"><span><i style="background:var(--text-2)"></i>misura (media oraria)</span><span><i style="background:var(--s1)"></i>modello</span><span><i class="box" style="background:var(--band)"></i>banda 5–95%</span></div>
+    <div class="chart tall"><canvas id="c-vh"></canvas></div>
+    <div class="legend" style="margin-top:8px"><span><i class="box" style="background:var(--s3)"></i>pioggia interpolata e tarata (mm/h)</span></div>
+    <div class="chart" style="height:130px"><canvas id="c-vhp"></canvas></div>
+    <p class="note">Con «verifica» ogni anno è simulato con i parametri tarati sull'altro (2025 con quelli del 2026 e viceversa): è la misura onesta dell'errore. Zoom: trascina con due dita o usa la serie scaricabile.</p>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <h3>Serie sintetica 2016–2026 (medie giornaliere)</h3>
+    <div class="legend"><span><i style="background:var(--s1)"></i>15 cm</span><span><i style="background:var(--s2)"></i>30 cm</span><span><i style="background:var(--s3)"></i>60 cm</span><span><i style="background:var(--text-2)"></i>misura</span></div>
+    <div class="chart tall"><canvas id="c-vd2"></canvas></div>
+    <p class="note">Il periodo misurato (2025: ≈1170 mm) è tra i più secchi del decennio. Negli anni più piovosi (2019: 1685 mm, novembre 2019: 487 mm) il modello lavora fuori dalle condizioni di taratura.</p>
+  </div>
+
+  <div class="grid g2" style="margin-top:16px">
+    <div class="card">
+      <div class="ctrl"><h3 style="margin:0">Distribuzione mensile stocastica</h3>
+        <div class="seg" id="qz"><button data-z="15 cm" class="on">15 cm</button><button data-z="30 cm">30 cm</button><button data-z="60 cm">60 cm</button></div></div>
+      <div class="legend"><span><i class="box" style="background:var(--band)"></i>Monte Carlo 5–95%</span><span><i class="box" style="background:var(--band2)"></i>25–75%</span><span><i style="background:var(--s1)"></i>mediana Monte Carlo</span><span><i style="background:var(--s2)"></i>mediana serie 2016–2026</span><span><i class="box" style="background:var(--text-2);border-radius:50%"></i>mediana misura</span></div>
+      <div class="chart"><canvas id="c-vq"></canvas></div>
+      <p class="note" id="vq-n"></p>
+    </div>
+    <div class="card">
+      <div class="ctrl"><h3 style="margin:0">Densità di probabilità</h3>
+        <select id="ps" aria-label="Stagione"></select>
+        <div class="seg" id="pz"><button data-z="15 cm" class="on">15 cm</button><button data-z="30 cm">30 cm</button><button data-z="60 cm">60 cm</button></div></div>
+      <div class="legend" id="p-leg"></div>
+      <div class="chart"><canvas id="c-vp"></canvas></div>
+      <p class="note" id="vp-n"></p>
+    </div>
+  </div>
+
+  <div class="grid" style="margin-top:16px">
+    <div class="card"><h3>Verifica del modello (VWC orario)</h3><div class="tw"><table id="t-vv"></table></div>
+      <p class="note">NSE = 1 − errore quadratico / varianza della misura; KGE = Kling–Gupta. Errore e scarto in m³/m³. Il primo mese di ogni periodo di taratura è escluso dall'obiettivo (riscaldamento).</p>
+      <h3 style="margin-top:16px">Periodi secchi a 15 cm (VWC &lt; 0,04)</h3><div class="tw"><table id="t-vs"></table></div></div>
+    <div class="card"><h3>Parametri tarati (serie fornita)</h3><div class="tw"><table id="t-vpar"></table></div>
+      <p class="note">θ<sub>h</sub> e θ<sub>s</sub> fissati dai minimi e massimi orari misurati (−0,003 / +0,01); gli altri tarati. Dove θ* = θ<sub>fc</sub> l'evaporazione cala linearmente sotto la capacità di campo, senza tratto a tasso massimo.</p>
+      <h3 style="margin-top:16px">Pioggia stocastica: parametri mensili</h3><div class="tw"><table id="t-vpo"></table></div>
+      <p class="note">Dalla pioggia giornaliera interpolata e tarata 2016–2026, giorni piovosi ≥ 1 mm (99% del totale). λ = eventi al giorno, α = altezza media per evento.</p></div>
+  </div>
+
+  <div class="card method" style="margin-top:16px;max-width:none">
+    <h3 style="margin-top:0">Metodo</h3>
+    <ol class="steps">
+      <li><b>VWC orario.</b> Media dei 12 valori a 5 minuti nell'ora (almeno 9), con etichetta a fine ora come la pioggia. Il registratore non salta né ripete l'ora ai cambi d'ora, e il ritardo pioggia → risposta a 15 cm è lo stesso nei periodi di ora legale e solare (mediana 180 e 182 min su 51 eventi). Non risulta quindi lo sfasamento trovato sul pluviometro locale.</li>
+      <li><b>Forzanti.</b> Pioggia: stima interpolata × 1,072 per tutte le ore (anche nel periodo misurato, per usare in taratura la stessa forzante della generazione). Evaporazione potenziale ET<sub>0</sub>: Hargreaves giornaliera dalla temperatura interpolata, ripartita sulle ore secondo l'altezza del sole.</li>
+      <li><b>Bilancio a tre strati</b> (0–22,5, 22,5–45, 45–75 cm, spessori Z = 225, 225, 300 mm). Per ogni strato, con passo di 15 minuti:
+        <br><code>Z dθ/dt = ingresso − E(θ) − L(θ)</code>
+        <br><code>E = c · ET0 · min(1, (θ − θh)/(θ* − θh))</code> per θ &gt; θ<sub>h</sub>. Suolo nudo: nella funzione di Laio E<sub>w</sub> = 0 e s<sub>w</sub> = s<sub>h</sub>.
+        <br><code>L = Ks · (e^(β(θ − θfc)) − 1)/(e^(β(θs − θfc)) − 1)</code> per θ &gt; θ<sub>fc</sub>: drenaggio di Laio et al. (2001).
+        <br>La pioggia entra nello strato 1, il drenaggio di ogni strato alimenta quello sotto, e l'eccesso oltre la saturazione ruscella.</li>
+      <li><b>Taratura.</b> 15 parametri (θ*, θ<sub>fc</sub>, K<sub>s</sub>, β, c per strato) con evoluzione differenziale. Obiettivo: media su tre profondità di errore quadratico / varianza. Verifica incrociata 2025 ↔ 2026, poi taratura su tutto il periodo per la serie fornita.</li>
+      <li><b>Serie 2016–2026.</b> Simulazione continua dal 1/1/2016 (stato iniziale = media misurata gen–feb), senza riportarla alle misure. Banda 5–95% = quantili dei residui di verifica, per profondità e semestre (umido ott–apr, secco mag–set).</li>
+      <li><b>Parte stocastica.</b> Pioggia a impulsi di Poisson marcati (Rodriguez-Iturbe et al. 1999; Laio et al. 2001): eventi giornalieri con frequenza λ e altezza esponenziale di media α, mensili. Ogni evento è distribuito sulle ore con il profilo di un giorno piovoso osservato dello stesso mese. ET<sub>0</sub> è quella di un anno osservato estratto a caso. Si simulano 300 anni, il primo come riscaldamento.</li>
+      <li><b>Soluzione analitica di Laio.</b> Per lo strato superficiale (ingresso = sola pioggia) la densità stazionaria è
+        <br><code>p(θ) = C/ρ(θ) · exp(−θ·Z/α + λ ∫ dθ/ρ(θ))</code>, con ρ = (E + L)/Z, per stagione con λ, α ed ET<sub>0</sub> medi. Verifica dell'implementazione: un Monte Carlo a un solo strato con le stesse ipotesi dà la stessa media (differenza ≤ 0,003).</li>
+      <li><b>Suzione.</b> Curva di ritenzione di van Genuchten adattata alle coppie orarie misurate θ–suzione per profondità, applicata alla serie sintetica.</li>
+    </ol>
+    <h3>Limiti</h3>
+    <ul>
+      <li>Taratura su 21 mesi relativamente secchi. Gli anni più piovosi del decennio (2018, 2019, 2021–2023) e i picchi oltre i massimi misurati sono un'estrapolazione: θ non può superare θ<sub>s</sub> = massimo misurato + 0,01.</li>
+      <li>Il modello sottostima i picchi orari a 15 cm (massimo simulato 0,20 contro 0,26 misurato a 5 minuti).</li>
+      <li>Il modello non riproduce l'umettamento rapido di settembre 2025 a 60 cm (probabile flusso preferenziale) e sovrastima il 60 cm dopo ottobre 2026.</li>
+      <li>L'errore della pioggia oraria (corr. 0,93, 15% di ore piovose perse) si propaga soprattutto ai primi 15 cm.</li>
+      <li>La suzione da curva di ritenzione ignora l'isteresi (R² su log ψ 0,81–0,89): è indicativa, non va usata per singoli eventi.</li>
+      <li>Parametri parzialmente equifinali: le due tarature annuali danno θ<sub>fc</sub> e K<sub>s</sub> diversi con prestazioni simili. Usare la banda, non il solo valore centrale.</li>
+    </ul>
+    <p class="note">Laio F., Porporato A., Ridolfi L., Rodriguez-Iturbe I. (2001). Plants in water-controlled ecosystems: active role in hydrologic processes and response to water stress. II. Probabilistic soil moisture dynamics. Advances in Water Resources 24, 707–723. · Rodriguez-Iturbe I., Porporato A., Ridolfi L., Isham V., Cox D.R. (1999). Probabilistic modelling of water balance at a point: the role of climate, soil and vegetation. Proc. R. Soc. Lond. A 455, 3789–3805.</p>
+  </div>
+</section>
+
 <section id="metodo">
   <h2>Metodologia</h2>
   <div class="grid g2">
@@ -262,6 +350,8 @@ footer{color:var(--muted);font-size:12.5px;padding:28px 0 40px}
     <div class="card">
       <div class="dl"><div><b>salerno_punto_orario_2016_2026_tarato.csv</b><span class="tag">principale</span><div class="d">Serie oraria finale: temperatura (°C, deviazione standard di kriging, n. termometri), pioggia (mm), fonte della pioggia (misura / stima tarata), stima tarata e misura separate, n. pluviometri.</div></div><div class="s">4,9 MB<br><a class="btn" href="dati/salerno_punto_orario_2016_2026_tarato.csv" download>Scarica</a></div></div>
       <div class="dl"><div><b>pioggia_misurata_punto_ora_solare.csv</b><div class="d">Pioggia misurata sul punto riportata all'ora solare, con l'orario originale e l'indicazione delle ore spostate.</div></div><div class="s"><a href="dati/pioggia_misurata_punto_ora_solare.csv" download>CSV</a><br><a href="dati/sfasamento_orario_misura_per_evento.csv" download>Sfasamenti</a></div></div>
+      <div class="dl"><div><b>vwc_sintetico_orario_2016_2026.csv</b><span class="tag">VWC</span><div class="d">VWC orario 2016–2026 a 15, 30, 60 cm (m³/m³) con banda 5–95%, suzione stimata (kPa), pioggia ed ET<sub>0</sub> usate, VWC misurato dove c'è.</div></div><div class="s">10 MB<br><a class="btn" href="dati/vwc_sintetico_orario_2016_2026.csv" download>Scarica</a></div></div>
+      <div class="dl"><div><b>VWC misurato, Monte Carlo, parametri</b><div class="d">Medie orarie delle misure a 5 minuti (VWC e suzione); 50 dei 299 anni stocastici (VWC orario, gzip); parametri mensili della pioggia stocastica; parametri e verifiche della taratura (JSON).</div></div><div class="s"><a href="dati/vwc_misurato_medie_orarie.csv" download>Misure</a> · <a href="dati/vwc_montecarlo_50anni.csv.gz" download>Monte Carlo</a><br><a href="dati/pioggia_poisson_marcato_mensile.csv" download>λ, α</a> · <a href="dati/taratura_laio.json" download>Taratura</a></div></div>
       <div class="dl"><div><b>Isoiete mensili 2016–2026</b><span class="tag">animazione</span><div class="d">Animazione delle isoiete mensili su rilievo ombreggiato (MP4 e GIF); poligoni delle isoiete in GeoJSON (EPSG:4326, proprietà mese e fascia in mm); griglia della pioggia mensile a 200 m in GeoTIFF multibanda (EPSG:32632, una banda per mese, ordine nella descrizione del file).</div></div><div class="s">3,5 / 9,5 MB<br><a href="dati/isoiete_mensili_2016_2026.mp4" download>MP4</a> · <a href="dati/isoiete_mensili_2016_2026.gif" download>GIF</a><br><a href="dati/isoiete_mensili_2016_2026.geojson" download>GeoJSON</a> · <a href="dati/pioggia_mensile_griglia_200m.tif" download>GeoTIFF</a></div></div>
       <div class="dl"><div><b>stazioni_10min_2016_2026.zip</b><div class="d">Un file per sensore (10 stazioni) a 10 minuti, dopo i controlli.</div></div><div class="s">17 MB<br><a class="btn" href="dati/stazioni_10min_2016_2026.zip" download>Scarica</a></div></div>
       <div class="dl"><div><b>verifica_stazioni.csv</b><div class="d">Controlli per sensore: righe, doppioni, valori scartati, completezza.</div></div><div class="s"><a href="dati/verifica_stazioni.csv" download>CSV</a></div></div>
@@ -282,7 +372,10 @@ footer{color:var(--muted);font-size:12.5px;padding:28px 0 40px}
         <li><code>pioggia_spaziotemporale.py</code> — confronto dei metodi per la pioggia oraria</li>
         <li><code>taratura_pioggia.py</code> — taratura sulla pioggia misurata e serie finale</li>
         <li><code>isoiete.py</code> — campi di pioggia su griglia, isoiete e animazioni</li>
-        <li><code>prepara_dashboard.py</code> — dati di questa pagina</li>
+        <li><code>vwc/orologio_vwc.py</code> — controllo dell'orologio del registratore VWC</li>
+        <li><code>vwc/laio_vwc.py</code> — modello di Laio a tre strati, taratura e verifica incrociata</li>
+        <li><code>vwc/genera_vwc.py</code> — serie 2016–2026, Monte Carlo, pdf analitica, suzione</li>
+        <li><code>prepara_dashboard.py</code>, <code>vwc/prepara_vwc.py</code> — dati di questa pagina</li>
       </ol>
       <p class="note">Versioni precedenti per confronto: <code>interp_salerno.py</code> (giornaliero 2001–2020), <code>orario_salerno.py</code> (gradiente verticale), <code>orario_orografia2.py</code>, <code>orario_orografia10.py</code> (strati a 50 m e 10 m).</p>
       <h3 style="margin-top:16px">Colonne della serie principale</h3>
@@ -361,6 +454,7 @@ function build(){
   mk('c-monP',{type:'bar',data:{labels:MESI,datasets:[{data:C.map(m=>m.pioggia),backgroundColor:s1,borderRadius:4,maxBarThickness:30,label:'pioggia'}]},
     options:base({plugins:{...base().plugins,tooltip:{...base().plugins.tooltip,callbacks:{label:c=>`${fmt(c.parsed.y,0)} mm`}}},scales:{...base().scales,y:{...base().scales.y,beginAtZero:true,title:{display:true,text:'mm',color:css('--text-2')}}}})});
   drawYear(); drawSfas();
+  if(VW) drawVWAll();
   // validazione pioggia
   const V=D.valp;
   mk('c-vd',{type:'line',data:{labels:V.giorni.map(g=>g[0]),datasets:[
@@ -491,6 +585,107 @@ fetch('assets/dati_dashboard.json').then(r=>r.json()).then(j=>{
   [...new Set(D.daily.map(r=>r[0].slice(0,4)))].reverse().forEach(y=>sel.add(new Option(y,y)));
   sel.value='2025'; sel.onchange=drawYear;
   build(); tables(); drawMap();
+});
+
+// ------------------------------------------------------------------ VWC
+let VW=null, vz='15cm', qz='15 cm', pz='15 cm';
+function kill(ids){ids.forEach(id=>{const i=charts.findIndex(c=>c.canvas.id===id); if(i>=0){charts[i].destroy(); charts.splice(i,1);}});}
+const utc=s=>Date.UTC(+s.slice(0,4),+s.slice(5,7)-1,+s.slice(8,10),+(s.slice(11,13)||0),+(s.slice(14,16)||0));
+const dlab=(v,withH)=>{const d=new Date(v); const t=d.getUTCDate()+' '+MESI[d.getUTCMonth()]+' '+d.getUTCFullYear(); return withH?t+' ore '+String(d.getUTCHours()).padStart(2,'0')+':00':t;};
+function linX(minV,maxV,fmtTick){return {type:'linear',min:minV,max:maxV,grid:{display:false},border:{color:css('--line')},ticks:{color:css('--text-2'),maxTicksLimit:8,maxRotation:0,callback:fmtTick}};}
+function drawVWH(){
+  kill(['c-vh','c-vhp']);
+  const O=VW.ore, t0=utc(O.t0), Z=O[vz], ver=document.getElementById('vver').value, s1=css('--s1'), band=css('--band'), tx=css('--text-2');
+  const pt=a=>a.map((v,i)=>({x:t0+i*3600e3,y:v}));
+  const tick=v=>{const d=new Date(v);return MESI[d.getUTCMonth()]+' '+String(d.getUTCFullYear()).slice(2);};
+  const xmin=t0, xmax=t0+(O.n-1)*3600e3;
+  const ds=[{data:pt(Z.hi),borderWidth:0,pointRadius:0,fill:'+1',backgroundColor:band,label:'95%'},
+            {data:pt(Z.lo),borderWidth:0,pointRadius:0,fill:false,label:'5%'},
+            {data:pt(Z.mis),borderColor:tx,borderWidth:1.2,pointRadius:0,label:'misura'},
+            {data:pt(Z[ver]),borderColor:s1,borderWidth:2,pointRadius:0,label:'modello'}];
+  if(ver==='cv'){ds[0].hidden=true; ds[1].hidden=true;}
+  mk('c-vh',{type:'line',data:{datasets:ds},options:base({parsing:false,normalized:true,spanGaps:false,
+    plugins:{...base().plugins,decimation:{enabled:true,algorithm:'min-max'},tooltip:{...base().plugins.tooltip,filter:c=>c.datasetIndex>1,callbacks:{title:c=>dlab(c[0].parsed.x,true),label:c=>`${c.dataset.label}: ${c.parsed.y==null?'–':fmt(c.parsed.y,3)}`}}},
+    scales:{x:linX(xmin,xmax,tick),y:{...base().scales.y,title:{display:true,text:'VWC (m³/m³)',color:tx}}}})});
+  mk('c-vhp',{type:'line',data:{datasets:[{data:pt(O.pioggia),borderColor:css('--s3'),backgroundColor:css('--s3'),borderWidth:1,pointRadius:0,fill:'origin',label:'pioggia'}]},
+    options:base({parsing:false,normalized:true,plugins:{...base().plugins,decimation:{enabled:true,algorithm:'min-max'},tooltip:{...base().plugins.tooltip,callbacks:{title:c=>dlab(c[0].parsed.x,true),label:c=>`${fmt(c.parsed.y,1)} mm`}}},
+      scales:{x:linX(xmin,xmax,tick),y:{...base().scales.y,beginAtZero:true,title:{display:true,text:'mm/h',color:tx}}}})});
+}
+function drawVWD(){
+  kill(['c-vd2']);
+  const G=VW.giorni, xs=G.t.map(utc), tx=css('--text-2');
+  const pt=a=>a.map((v,i)=>({x:xs[i],y:v}));
+  const tick=v=>String(new Date(v).getUTCFullYear());
+  mk('c-vd2',{type:'line',data:{datasets:[
+    {data:pt(G['15cm']),borderColor:css('--s1'),borderWidth:1.3,pointRadius:0,label:'15 cm'},
+    {data:pt(G['30cm']),borderColor:css('--s2'),borderWidth:1.3,pointRadius:0,label:'30 cm'},
+    {data:pt(G['60cm']),borderColor:css('--s3'),borderWidth:1.3,pointRadius:0,label:'60 cm'},
+    {data:pt(G['15cm_mis']),borderColor:tx,borderWidth:1,pointRadius:0,label:'misura 15 cm'},
+    {data:pt(G['30cm_mis']),borderColor:tx,borderWidth:1,pointRadius:0,label:'misura 30 cm'},
+    {data:pt(G['60cm_mis']),borderColor:tx,borderWidth:1,pointRadius:0,label:'misura 60 cm'}]},
+    options:base({parsing:false,normalized:true,plugins:{...base().plugins,decimation:{enabled:true,algorithm:'min-max'},tooltip:{...base().plugins.tooltip,filter:c=>c.parsed.y!=null,callbacks:{title:c=>dlab(c[0].parsed.x,false),label:c=>`${c.dataset.label}: ${fmt(c.parsed.y,3)}`}}},
+      scales:{x:linX(xs[0],xs[xs.length-1],tick),y:{...base().scales.y,title:{display:true,text:'VWC (m³/m³)',color:tx}}}})});
+}
+function drawVWQ(){
+  kill(['c-vq']);
+  const Q=VW.quantili, M=Q.mc[qz], Sr=Q.serie[qz], Ob=Q.misura[qz], tx=css('--text-2');
+  mk('c-vq',{type:'line',data:{labels:MESI,datasets:[
+    {data:M.map(q=>q[4]),borderWidth:0,pointRadius:0,fill:'+1',backgroundColor:css('--band'),label:'95%'},
+    {data:M.map(q=>q[0]),borderWidth:0,pointRadius:0,fill:false,label:'5%'},
+    {data:M.map(q=>q[3]),borderWidth:0,pointRadius:0,fill:'+1',backgroundColor:css('--band2'),label:'75%'},
+    {data:M.map(q=>q[1]),borderWidth:0,pointRadius:0,fill:false,label:'25%'},
+    {data:M.map(q=>q[2]),borderColor:css('--s1'),backgroundColor:css('--s1'),borderWidth:2,pointRadius:3,label:'mediana Monte Carlo'},
+    {data:Sr.map(q=>q[2]),borderColor:css('--s2'),backgroundColor:css('--s2'),borderWidth:2,pointRadius:3,label:'mediana serie 2016–2026'},
+    {data:Ob.map(q=>q[2]),borderColor:tx,backgroundColor:tx,showLine:false,pointRadius:5,pointHoverRadius:7,borderWidth:2,label:'mediana misura'}]},
+    options:base({plugins:{...base().plugins,tooltip:{...base().plugins.tooltip,callbacks:{label:c=>`${c.dataset.label}: ${fmt(c.parsed.y,3)}`}}},scales:{...base().scales,y:{...base().scales.y,title:{display:true,text:'VWC (m³/m³)',color:tx}}}})});
+  document.getElementById('vq-n').textContent=`${VW.NY-1} anni di pioggia stocastica nel modello tarato. La banda dice quanto il VWC di un mese può variare per effetto della sola variabilità climatica della pioggia.`;
+}
+function drawVWP(){
+  kill(['c-vp']);
+  const sn=document.getElementById('ps').value, E=VW.pdf[sn], Sx=E.strati[pz], b=Sx.bins, tx=css('--text-2');
+  const mids=b.slice(0,-1).map((v,i)=>(v+b[i+1])/2);
+  const ds=[
+    {type:'bar',data:mids.map((x,i)=>({x,y:Sx.misura[i]})),backgroundColor:css('--band2'),borderWidth:0,barPercentage:1,categoryPercentage:1,label:'misura 2025–2026'},
+    {data:mids.map((x,i)=>({x,y:Sx.mc[i]})),borderColor:css('--s1'),borderWidth:2,pointRadius:0,label:'Monte Carlo (modello orario)'},
+    {data:mids.map((x,i)=>({x,y:Sx.serie[i]})),borderColor:css('--s2'),borderWidth:2,pointRadius:0,label:'serie 2016–2026'}];
+  let leg=`<span><i class="box" style="background:var(--band2)"></i>misura 2025–2026</span><span><i style="background:var(--s1)"></i>Monte Carlo, modello orario</span><span><i style="background:var(--s2)"></i>serie 2016–2026</span>`;
+  if(pz==='15 cm'){
+    ds.push({data:E.analitica.x.map((x,i)=>({x,y:E.analitica.p[i]})),borderColor:css('--text'),borderDash:[5,4],borderWidth:2,pointRadius:0,label:'Laio analitica'});
+    leg+=`<span><i style="background:var(--text)"></i>Laio et al. 2001, analitica (tratteggio)</span>`;
+  }
+  document.getElementById('p-leg').innerHTML=leg;
+  const ymax=Math.max(...Sx.mc,...Sx.serie,...Sx.misura.filter(v=>v!=null))*1.15;
+  mk('c-vp',{type:'line',data:{datasets:ds},options:base({parsing:false,interaction:{mode:'nearest',axis:'x',intersect:false},
+    plugins:{...base().plugins,tooltip:{...base().plugins.tooltip,callbacks:{title:c=>'VWC '+fmt(c[0].parsed.x,3),label:c=>`${c.dataset.label}: ${fmt(c.parsed.y,1)}`}}},
+    scales:{x:{type:'linear',min:b[0],max:b[b.length-1],grid:{display:false},border:{color:css('--line')},ticks:{color:tx,maxTicksLimit:7,callback:v=>fmt(v,2)},title:{display:true,text:'VWC (m³/m³)',color:tx}},
+            y:{...base().scales.y,beginAtZero:true,max:ymax,title:{display:true,text:'densità',color:tx}}}})});
+  const ck=VW.check[sn];
+  document.getElementById('vp-n').textContent=`${sn}: λ = ${fmt(E.lam,2)} eventi/giorno, α = ${fmt(E.alpha,1)} mm, ET₀ = ${fmt(E.et0,1)} mm/giorno.`+
+    (pz==='15 cm'?` Media analitica ${fmt(ck.media_analitica,3)}, Monte Carlo a un solo strato con le stesse ipotesi ${fmt(ck.media_mc,3)}. La curva analitica assume la stagione stazionaria, le altre seguono il ciclo annuale.`:' Per gli strati profondi (alimentati dal drenaggio di quelli sopra) non esiste una soluzione analitica: solo Monte Carlo.');
+}
+function vwTables(){
+  const V=VW.verifica, N=['15 cm','30 cm','60 cm'], ks=Object.keys(V);
+  const vcv=[...N.map(n=>V[ks[0]][n]),...N.map(n=>V[ks[1]][n])];
+  const rng=(a,d)=>fmt(Math.min(...a),d)+'–'+fmt(Math.max(...a),d);
+  document.getElementById('kv-c').textContent=rng(vcv.map(r=>r.corr),2);
+  document.getElementById('kv-n').textContent=rng(vcv.map(r=>r.NSE),2);
+  document.getElementById('kv-b').textContent=rng(Object.values(VW.copertura).map(v=>v*100),0)+'%';
+  const rows=[]; ks.forEach(k=>N.forEach((n,i)=>{const r=V[k][n]; rows.push([i===0?k:'',n,r.NSE,r.KGE,r.corr,fmt(r.RMSE,3),fmt(r.bias,3)]);}));
+  table('t-vv',['Taratura → verifica','Profondità','NSE','KGE','Correlazione','Errore','Scarto medio'],rows);
+  const PS=VW.periodi_secchi, lab={'mc':`Monte Carlo (${VW.NY-1} anni)`,'serie 2016-2026':'Serie 2016–2026','misura':'Misura 2025–2026'};
+  table('t-vs',['','Periodi/anno','Durata media (giorni)','Durata massima (giorni)'],Object.keys(PS).map(k=>[lab[k]||k,fmt(PS[k].n_anno,1),fmt(PS[k].media_g,1),fmt(PS[k].max_g,0)]));
+  table('t-vpar',['Strato','Z (mm)','θh','θ*','θfc','θs','Ks (mm/h)','β','c'],VW.parametri.map(p=>[p.strato,fmt(p.Z,0),fmt(p.th_h,3),fmt(p.th_star,3),fmt(p.th_fc,3),fmt(p.th_s,3),fmt(p.Ks,1),fmt(p.beta,1),fmt(p.c,2)]));
+  const P=VW.poisson;
+  document.getElementById('t-vpo').innerHTML='<tr><th></th>'+MESI.map(m=>`<th>${m}</th>`).join('')+'</tr><tr><td>λ (1/giorno)</td>'+P.lam.map(v=>`<td>${fmt(v,2)}</td>`).join('')+'</tr><tr><td>α (mm)</td>'+P.alpha.map(v=>`<td>${fmt(v,1)}</td>`).join('')+'</tr>';
+}
+function drawVWAll(){ drawVWH(); drawVWD(); drawVWQ(); drawVWP(); }
+function seg(id,cb){document.querySelectorAll('#'+id+' button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#'+id+' button').forEach(x=>x.classList.toggle('on',x===b)); cb(b.dataset.z);});}
+fetch('assets/vwc.json').then(r=>r.json()).then(j=>{
+  VW=j;
+  const ps=document.getElementById('ps'); Object.keys(VW.pdf).forEach(k=>ps.add(new Option(k,k))); ps.value='autunno (SON)'; ps.onchange=drawVWP;
+  seg('vz',z=>{vz=z; drawVWH();}); seg('qz',z=>{qz=z; drawVWQ();}); seg('pz',z=>{pz=z; drawVWP();});
+  document.getElementById('vver').onchange=drawVWH;
+  vwTables(); drawVWAll();
 });
 // voce di menu attiva
 const links=[...document.querySelectorAll('nav a')];

@@ -29,3 +29,7 @@ Dati di partenza non validati. La temperatura ha un errore orario stimato di cir
 orario ha la posizione del punto (mezza costa, vicino al mare). Dettagli nella sezione Metodologia della dashboard.
 
 Dati: Centro Funzionale Multirischi – Protezione Civile Regione Campania; TINITALY 1.1 (INGV, CC BY 4.0).
+
+## Serie sintetiche di VWC (Laio et al. 2001)
+
+`dati/vwc_sintetico_orario_2016_2026.csv`: contenuto d'acqua volumetrico orario a 15, 30 e 60 cm con banda 5–95% e suzione stimata. È generato da un bilancio idrico a tre strati con la funzione di perdita di Laio et al. (2001), tarato sulle misure del sito (suolo nudo, 31/01/2025–16/11/2026) e forzato dalla pioggia interpolata e tarata. La parte stocastica usa piogge a impulsi di Poisson marcati (Monte Carlo di 300 anni) e la pdf analitica di Laio per lo strato superficiale. Script in `script/vwc/`.
