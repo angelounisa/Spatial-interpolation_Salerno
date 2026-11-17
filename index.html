@@ -216,7 +216,7 @@ footer{color:var(--muted);font-size:12.5px;padding:28px 0 40px}
 
 <section id="dati">
   <h2>Dati da scaricare</h2>
-  <p class="lead">Tutti i file sono nel repository. Gli strati del DTM, più pesanti, sono nella release.</p>
+  <p class="lead">Tutti i file sono nel repository GitHub e si scaricano da qui.</p>
   <div class="grid g2">
     <div class="card">
       <div class="dl"><div><b>salerno_punto_orario_2016_2026_tarato.csv</b><span class="tag">principale</span><div class="d">Serie oraria finale: temperatura (°C, deviazione standard di kriging, n. termometri), pioggia (mm), fonte della pioggia (misura / stima tarata), stima tarata e misura separate, n. pluviometri.</div></div><div class="s">4,9 MB<br><a class="btn" href="dati/salerno_punto_orario_2016_2026_tarato.csv" download>Scarica</a></div></div>
@@ -225,7 +225,8 @@ footer{color:var(--muted);font-size:12.5px;padding:28px 0 40px}
       <div class="dl"><div><b>validazione_temperatura.csv · validazione_pioggia.csv</b><div class="d">Validazione incrociata sulle stazioni orarie.</div></div><div class="s"><a href="dati/validazione_temperatura.csv" download>T</a> · <a href="dati/validazione_pioggia.csv" download>P</a></div></div>
       <div class="dl"><div><b>medie_climatiche_punto_2001_2020.csv</b><div class="d">Tmax e Tmin medie mensili stimate sul punto dal modello orografico.</div></div><div class="s"><a href="dati/medie_climatiche_punto_2001_2020.csv" download>CSV</a></div></div>
       <div class="dl"><div><b>stazioni_regionali_orografia_10m.csv · punto_orografia_10m.csv</b><div class="d">71 stazioni della rete regionale con medie 2001–2020 e variabili orografiche a 10 m (EPSG:32632); stesse variabili per il punto. Pronti per Regression Kriging in SAGA/QGIS.</div></div><div class="s"><a href="dati/stazioni_regionali_orografia_10m.csv" download>Stazioni</a> · <a href="dati/punto_orografia_10m.csv" download>Punto</a></div></div>
-      <div class="dl"><div><b>Strati orografici GeoTIFF</b><span class="tag">release</span><div class="d">14 strati a 10 m (22×22 km attorno al punto) e 12 strati a 50 m (area 100×50 km), EPSG:32632.</div></div><div class="s"><a class="btn" href="https://github.com/angelounisa/Spatial-interpolation_Salerno/releases/latest">Release</a></div></div>
+      <div class="dl"><div><b>Strati orografici a 10 m</b><span class="tag">GeoTIFF</span><div class="d">14 strati su 22×22 km attorno al punto, EPSG:32632, divisi in due archivi. Parte 1: quota, pendenza, esposizione sud e sud-ovest, TPI 100/250/500 m. Parte 2: TPI 2 km, altezza sul fondovalle e posizione relativa 1/2/5 km. In entrambi le stazioni e il punto.</div></div><div class="s">72 + 64 MB<br><a href="dati/strati/strati_10m_parte1_quota_pendenza_esposizione_tpi.zip" download>Parte 1</a> · <a href="dati/strati/strati_10m_parte2_tpi2km_fondovalle.zip" download>Parte 2</a></div></div>
+      <div class="dl"><div><b>Strati orografici a 50 m</b><span class="tag">GeoTIFF</span><div class="d">12 strati sull'area 100×50 km dei fogli w45095 e w45010, EPSG:32632, con le stazioni.</div></div><div class="s">78 MB<br><a href="dati/strati/strati_50m_area_vasta.zip" download>Scarica</a></div></div>
     </div>
     <div class="card">
       <h3>Script (Python)</h3>

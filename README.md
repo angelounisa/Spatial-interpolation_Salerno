@@ -15,7 +15,7 @@ che tiene conto dell'orografia (DTM TINITALY 10 m). La pioggia è tarata sulla m
 | `dati/validazione_*.csv`, `dati/verifica_stazioni.csv` | validazione e controlli |
 | `dati/stazioni_regionali_orografia_10m.csv` | 71 stazioni regionali con medie 2001–2020 e variabili orografiche |
 | `script/` | script Python per riprodurre l'elaborazione |
-| Release | strati orografici GeoTIFF a 10 m e 50 m (EPSG:32632) |
+| `dati/strati/` | strati orografici GeoTIFF a 10 m (due archivi) e 50 m, EPSG:32632 |
 
 ## Metodo in breve
 1. Unione e controllo dei dati a 10 minuti; aggregazione oraria (ora = fine intervallo).
