@@ -84,6 +84,18 @@ td.best{font-weight:600;color:var(--good)}
 .steps b{color:var(--text)}
 code{overflow-wrap:anywhere;font:13px "IBM Plex Mono",monospace;background:var(--surface-2);padding:1px 5px;border-radius:4px}
 #map{height:420px;border-radius:8px}
+#isomap{height:520px;border-radius:8px}
+.ctrl{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0 0 10px}
+.ctrl input[type=range]{flex:1;min-width:160px;accent-color:var(--accent)}
+.ctrl button{background:var(--accent);color:#fff;border:0;border-radius:6px;padding:6px 14px;font:inherit;font-weight:500;cursor:pointer;min-width:84px}
+.ctrl .seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.ctrl .seg button{background:var(--surface);color:var(--text-2);border-radius:0;min-width:0;padding:5px 12px}
+.ctrl .seg button.on{background:var(--surface-2);color:var(--text)}
+.now{font:600 18px "IBM Plex Sans",system-ui,sans-serif;font-variant-numeric:tabular-nums}
+.scale{display:flex;flex-wrap:wrap;gap:0;margin-top:8px;font-size:11px;color:var(--text-2)}
+.scale span{display:flex;flex-direction:column;align-items:center;min-width:30px;flex:1}
+.scale i{display:block;width:100%;height:10px}
+.iso-lab{background:none;border:0;box-shadow:none;font:600 11px "IBM Plex Sans",sans-serif;color:#0b0b0b;text-shadow:0 0 3px #fff,0 0 3px #fff}
 .dl{display:grid;grid-template-columns:1fr auto;gap:4px 16px;align-items:start;padding:12px 0;border-bottom:1px solid var(--line)}
 .dl:last-child{border-bottom:0}
 .dl b{overflow-wrap:anywhere}
@@ -103,7 +115,7 @@ footer{color:var(--muted);font-size:12.5px;padding:28px 0 40px}
   <p class="sub">Ricostruzione dai sensori del Centro Funzionale Multirischi della Regione Campania, con interpolazione che tiene conto dell'orografia (DTM TINITALY 10 m) e pioggia tarata sulla misura locale. Tutti gli orari sono in ora solare (UTC+1).</p>
 </header>
 <nav><div class="wrap">
-  <a href="#sintesi" class="on">Sintesi</a><a href="#risultati">Risultati</a><a href="#validazione">Validazione</a><a href="#metodo">Metodologia</a><a href="#dati">Dati</a>
+  <a href="#sintesi" class="on">Sintesi</a><a href="#risultati">Risultati</a><a href="#validazione">Validazione</a><a href="#isoiete">Isoiete</a><a href="#metodo">Metodologia</a><a href="#dati">Dati</a>
   <span class="sp"></span><button id="theme" aria-label="Cambia tema">Tema</button>
 </div></nav>
 
@@ -170,6 +182,24 @@ footer{color:var(--muted);font-size:12.5px;padding:28px 0 40px}
   <div class="card" style="margin-top:16px"><h3>Pioggia: validazione incrociata sui pluviometri</h3><p class="note" style="margin:0 0 6px">Ogni pluviometro stimato dagli altri cinque. Totali annui medi 2016–2026 (mm).</p><div class="tw"><table id="t-vg"></table></div></div>
 </section>
 
+<section id="isoiete">
+  <h2>Isoiete nel tempo</h2>
+  <p class="lead">Campi di pioggia sulla zona dei pluviometri, calcolati con lo stesso metodo della serie sul punto: kriging dei 6 pluviometri, distribuzione orografica della pioggia media (TINITALY 10 m) e fattore di taratura 1,072. Mensili 2016–2026 e i 10 eventi più forti sul punto, ora per ora.</p>
+  <div class="card">
+    <div class="ctrl">
+      <div class="seg" role="tablist"><button id="m-mese" class="on">Mensile</button><button id="m-evento">Eventi orari</button></div>
+      <select id="evsel" aria-label="Evento" style="display:none"></select>
+      <button id="play">▶ Avvia</button>
+      <input type="range" id="slider" min="0" max="0" value="0" aria-label="Fotogramma">
+      <select id="speed" aria-label="Velocità"><option value="900">lenta</option><option value="450" selected>normale</option><option value="180">veloce</option></select>
+    </div>
+    <div class="row" style="justify-content:space-between"><div><span class="now" id="iso-t">–</span> <span class="note" id="iso-p" style="margin-left:10px"></span></div><span class="note" style="margin:0" id="iso-u"></span></div>
+    <div id="isomap"></div>
+    <div class="scale" id="iso-leg"></div>
+    <p class="note">Mostrato solo entro 7 km dai pluviometri e sulla terraferma. Con 6 pluviometri le isoiete seguono soprattutto la loro distribuzione e il modello orografico: lontano dai pluviometri sono un'estrapolazione. Nei punti dei pluviometri il campo può differire dal valore misurato, perché include il fattore di taratura e la correzione orografica. Clic su un pluviometro per il valore del fotogramma.</p>
+  </div>
+</section>
+
 <section id="metodo">
   <h2>Metodologia</h2>
   <div class="grid g2">
@@ -232,6 +262,7 @@ footer{color:var(--muted);font-size:12.5px;padding:28px 0 40px}
     <div class="card">
       <div class="dl"><div><b>salerno_punto_orario_2016_2026_tarato.csv</b><span class="tag">principale</span><div class="d">Serie oraria finale: temperatura (°C, deviazione standard di kriging, n. termometri), pioggia (mm), fonte della pioggia (misura / stima tarata), stima tarata e misura separate, n. pluviometri.</div></div><div class="s">4,9 MB<br><a class="btn" href="dati/salerno_punto_orario_2016_2026_tarato.csv" download>Scarica</a></div></div>
       <div class="dl"><div><b>pioggia_misurata_punto_ora_solare.csv</b><div class="d">Pioggia misurata sul punto riportata all'ora solare, con l'orario originale e l'indicazione delle ore spostate.</div></div><div class="s"><a href="dati/pioggia_misurata_punto_ora_solare.csv" download>CSV</a><br><a href="dati/sfasamento_orario_misura_per_evento.csv" download>Sfasamenti</a></div></div>
+      <div class="dl"><div><b>Isoiete mensili 2016–2026</b><span class="tag">animazione</span><div class="d">Animazione delle isoiete mensili su rilievo ombreggiato (MP4 e GIF); poligoni delle isoiete in GeoJSON (EPSG:4326, proprietà mese e fascia in mm); griglia della pioggia mensile a 200 m in GeoTIFF multibanda (EPSG:32632, una banda per mese, ordine nella descrizione del file).</div></div><div class="s">3,5 / 9,5 MB<br><a href="dati/isoiete_mensili_2016_2026.mp4" download>MP4</a> · <a href="dati/isoiete_mensili_2016_2026.gif" download>GIF</a><br><a href="dati/isoiete_mensili_2016_2026.geojson" download>GeoJSON</a> · <a href="dati/pioggia_mensile_griglia_200m.tif" download>GeoTIFF</a></div></div>
       <div class="dl"><div><b>stazioni_10min_2016_2026.zip</b><div class="d">Un file per sensore (10 stazioni) a 10 minuti, dopo i controlli.</div></div><div class="s">17 MB<br><a class="btn" href="dati/stazioni_10min_2016_2026.zip" download>Scarica</a></div></div>
       <div class="dl"><div><b>verifica_stazioni.csv</b><div class="d">Controlli per sensore: righe, doppioni, valori scartati, completezza.</div></div><div class="s"><a href="dati/verifica_stazioni.csv" download>CSV</a></div></div>
       <div class="dl"><div><b>validazione_temperatura.csv · validazione_pioggia.csv</b><div class="d">Validazione incrociata sulle stazioni orarie.</div></div><div class="s"><a href="dati/validazione_temperatura.csv" download>T</a> · <a href="dati/validazione_pioggia.csv" download>P</a></div></div>
@@ -250,6 +281,7 @@ footer{color:var(--muted);font-size:12.5px;padding:28px 0 40px}
         <li><code>correggi_orario_misura.py</code> — riporta la pioggia misurata all'ora solare</li>
         <li><code>pioggia_spaziotemporale.py</code> — confronto dei metodi per la pioggia oraria</li>
         <li><code>taratura_pioggia.py</code> — taratura sulla pioggia misurata e serie finale</li>
+        <li><code>isoiete.py</code> — campi di pioggia su griglia, isoiete e animazioni</li>
         <li><code>prepara_dashboard.py</code> — dati di questa pagina</li>
       </ol>
       <p class="note">Versioni precedenti per confronto: <code>interp_salerno.py</code> (giornaliero 2001–2020), <code>orario_salerno.py</code> (gradiente verticale), <code>orario_orografia2.py</code>, <code>orario_orografia10.py</code> (strati a 50 m e 10 m).</p>
@@ -399,6 +431,59 @@ function drawMap(){
   L.circleMarker([D.punto.lat,D.punto.lon],{radius:9,color:'#fff',weight:2,fillColor:css('--s2'),fillOpacity:1}).addTo(map)
     .bindPopup(`<b>Punto di interesse</b><br>${D.punto.quota} m · ${D.punto.mare_km} km dal mare`);
 }
+
+// ------------------------------------------------------------------ isoiete
+let ISO=null, isomap=null, isoLayer=null, gMarkers=[], mode='mese', ev=0, idx=0, timer=null;
+const MESI_L=['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
+function frames(){ return mode==='mese'?ISO.mensili:ISO.eventi[ev].frames; }
+function levs(){ return mode==='mese'?ISO.lev_m:ISO.lev_h; }
+function cols(){ return mode==='mese'?ISO.colori_m:ISO.colori_h; }
+function legend(){
+  const L=levs(), C=cols();
+  document.getElementById('iso-leg').innerHTML=C.map((c,k)=>`<span><i style="background:${c}"></i>${k<L.length-1?(L[k]>0&&L[k]<1?fmt(L[k],1):fmt(L[k],0)):'≥'+fmt(L[k],0)}</span>`).join('');
+  document.getElementById('iso-u').textContent=mode==='mese'?'mm/mese':'mm/ora';
+}
+function drawFrame(){
+  const F=frames()[idx], C=cols();
+  if(isoLayer) isoLayer.remove();
+  isoLayer=L.geoJSON({type:'FeatureCollection',features:F.f.map(([k,r])=>({type:'Feature',properties:{k},geometry:{type:'Polygon',coordinates:r}}))},
+    {style:f=>({fillColor:C[f.properties.k],fillOpacity:.6,color:'#08234e',weight:.7,opacity:.6}),interactive:false}).addTo(isomap);
+  gMarkers.forEach(m=>{const v=F.g[m.nome]; m.mk.setTooltipContent(`${m.nome}: ${v==null?'–':fmt(v,1)+' mm'}`);});
+  let t=F.t;
+  if(mode==='mese'){const [y,m]=t.split('-'); t=MESI_L[+m-1]+' '+y;} else { const d=new Date(t.replace(' ','T')); t=d.toLocaleDateString('it-IT')+' ore '+t.slice(11,16)+' (fine ora, ora solare)'; }
+  document.getElementById('iso-t').textContent=t;
+  document.getElementById('iso-p').textContent=`punto: ${F.p==null?'–':fmt(F.p,mode==='mese'?0:1)} mm`+(mode==='mese'&&F.max!=null?` · massimo in mappa: ${fmt(F.max,0)} mm`:'');
+  document.getElementById('slider').value=idx;
+}
+function setMode(m){
+  mode=m; idx=0; stop();
+  document.getElementById('m-mese').classList.toggle('on',m==='mese'); document.getElementById('m-evento').classList.toggle('on',m!=='mese');
+  document.getElementById('evsel').style.display=m==='mese'?'none':'';
+  document.getElementById('slider').max=frames().length-1; legend(); drawFrame();
+}
+function stop(){ if(timer){clearInterval(timer); timer=null;} document.getElementById('play').textContent='▶ Avvia'; }
+function play(){
+  if(timer){stop();return;}
+  document.getElementById('play').textContent='❚❚ Pausa';
+  timer=setInterval(()=>{idx=(idx+1)%frames().length; drawFrame();},+document.getElementById('speed').value);
+}
+function initIso(){
+  isomap=L.map('isomap',{scrollWheelZoom:false}); isomap.createPane('punti'); isomap.getPane('punti').style.zIndex=650;
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:16,attribution:'© OpenStreetMap'}).addTo(isomap);
+  const pts=ISO.pluviometri.map(p=>[p.lat,p.lon]).concat([[ISO.punto.lat,ISO.punto.lon]]);
+  isomap.fitBounds(L.latLngBounds(pts).pad(0.25));
+  ISO.pluviometri.forEach(p=>{const mk=L.circleMarker([p.lat,p.lon],{pane:'punti',radius:6,color:'#fff',weight:1.5,fillColor:css('--s3'),fillOpacity:1}).addTo(isomap).bindTooltip(p.nome); gMarkers.push({nome:p.nome,mk});});
+  L.circleMarker([ISO.punto.lat,ISO.punto.lon],{pane:'punti',radius:8,color:'#fff',weight:2,fillColor:css('--s2'),fillOpacity:1}).addTo(isomap).bindTooltip('Punto di interesse');
+  const es=document.getElementById('evsel'); ISO.eventi.forEach((e,i)=>es.add(new Option(e.nome,i)));
+  es.onchange=()=>{ev=+es.value; setMode('evento');};
+  document.getElementById('m-mese').onclick=()=>setMode('mese');
+  document.getElementById('m-evento').onclick=()=>setMode('evento');
+  document.getElementById('play').onclick=play;
+  document.getElementById('speed').onchange=()=>{if(timer){stop();play();}};
+  document.getElementById('slider').oninput=e=>{idx=+e.target.value; drawFrame();};
+  setMode('mese');
+}
+fetch('assets/isoiete.json').then(r=>r.json()).then(j=>{ISO=j; initIso();});
 
 fetch('assets/dati_dashboard.json').then(r=>r.json()).then(j=>{
   D=j;
